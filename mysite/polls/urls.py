@@ -16,4 +16,8 @@ urlpatterns = [
     path('testground/', views.testground, name='testground'),
     # ex: /polls/register/
     path('register/', views.register, name='register'),
+    # ex /polls/login/
+    path('login/', views.login, name='login'),
+    # ex /polls/homepage
+    path('homepage/', views.homepage, name='homepage')
 ]

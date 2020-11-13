@@ -67,7 +67,13 @@ def testground(request):
 def register(request):
     if request.method == 'GET':
         # serve up the initial username/password/register stuff
-        return render(request, 'polls/register.html', {'verz': 'GET'})
+        atr = False
+        if 'attempted_registry' in request.session:
+            atr = True
+            
+
+        return render(request, 'polls/register.html', {'verz': 'GET', 'ar': atr})
+
     elif request.method == 'POST':
    
         # Need to sanitize input here to protect against stuff (just in case django doesn't) 
@@ -75,6 +81,7 @@ def register(request):
         ##
         ##
         # Checking to see if the user already exists
+        
 
         # Attempting to create new user
         username = request.POST['uname']
@@ -83,9 +90,32 @@ def register(request):
         try:
             new_user = User.objects.create(username=username, password=password)
             succeeded = True
+            request.session['username'] = username
         except IntegrityError:
             succeeded = False
 
+        request.session['attempted_registry'] = True
         return render(request, 'polls/register.html', {'verz': 'POST', 'succeeded': succeeded, 'username': username, 'password': password})
 
 
+def login(request):
+
+    if request.method == 'GET':
+        username = request.session.get('username')
+        if username:
+            return HttpResponseRedirect(reverse('polls:homepage'))
+        return render(request, 'polls/login.html')
+
+    elif request.method == 'POST':
+        username = request.session.get('username')
+        password = request.session.get('password')
+
+        user = User.objects.get(username=username, password=password)
+
+        ## redirect to homepage
+        return HttpResponseRedirect(reverse('polls:homepage'))
+
+
+def homepage(request):
+    username = request.session.get('username')
+    return render(request, 'polls/homepage.html', {'username': username})
