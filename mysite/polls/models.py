@@ -22,3 +22,8 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.choice_text
+
+class User(models.Model):
+    username = models.CharField('username', primary_key=True, max_length=150)
+    password = models.CharField('password', max_length=150)
+    

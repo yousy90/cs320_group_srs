@@ -5,6 +5,10 @@ from django.urls import reverse
 # Create your views here.
 from django.http import HttpResponse, HttpResponseRedirect
 from .models import Question
+from .models import User
+
+
+from django.db import IntegrityError
 
 from django.http import Http404
 
@@ -59,3 +63,29 @@ def results(request, question_id):
 
 def testground(request):
     return render(request, 'polls/testground.html')
+
+def register(request):
+    if request.method == 'GET':
+        # serve up the initial username/password/register stuff
+        return render(request, 'polls/register.html', {'verz': 'GET'})
+    elif request.method == 'POST':
+   
+        # Need to sanitize input here to protect against stuff (just in case django doesn't) 
+        ##
+        ##
+        ##
+        # Checking to see if the user already exists
+
+        # Attempting to create new user
+        username = request.POST['uname']
+        password = request.POST['pword']
+        succeeded = False
+        try:
+            new_user = User.objects.create(username=username, password=password)
+            succeeded = True
+        except IntegrityError:
+            succeeded = False
+
+        return render(request, 'polls/register.html', {'verz': 'POST', 'succeeded': succeeded, 'username': username, 'password': password})
+
+
