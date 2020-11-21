@@ -19,5 +19,8 @@ urlpatterns = [
     # ex /polls/login/
     path('login/', views.login, name='login'),
     # ex /polls/homepage
-    path('homepage/', views.homepage, name='homepage')
+    path('homepage/', views.homepage, name='homepage'),
+    # api test
+    path('apitest/', views.apitest, name='apitest'),
+    
 ]

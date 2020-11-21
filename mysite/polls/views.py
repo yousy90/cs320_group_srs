@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from .models import Question
 from .models import User
-
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.db import IntegrityError
 
@@ -101,16 +101,31 @@ def register(request):
 def login(request):
 
     if request.method == 'GET':
+        # Checking if user is already logged in
         username = request.session.get('username')
         if username:
             return HttpResponseRedirect(reverse('polls:homepage'))
+
+        # Checking if user just failed a login attempt
+        if request.session.get('failed_login'):
+            request.session['failed_login'] = False
+            # Seems like the template defers to session (maybe request?) params over identically named
+            # data params passed, thus here we have login_failed
+            return render(request, 'polls/login.html', {'login_failed': True})
+           
+        # Sending user to login field for the first time 
         return render(request, 'polls/login.html')
 
     elif request.method == 'POST':
-        username = request.session.get('username')
-        password = request.session.get('password')
+        username = request.POST['uname']
+        password = request.POST['pword']
 
-        user = User.objects.get(username=username, password=password)
+        try: 
+            user = User.objects.get(username=username, password=password)
+        except ObjectDoesNotExist:
+            request.session['failed_login'] = True
+            return render(request, 'polls/login.html', {'login_failed': True}) 
+            
 
         ## redirect to homepage
         return HttpResponseRedirect(reverse('polls:homepage'))
@@ -119,3 +134,9 @@ def login(request):
 def homepage(request):
     username = request.session.get('username')
     return render(request, 'polls/homepage.html', {'username': username})
+
+
+from django.http import JsonResponse
+
+def apitest(request):
+    return JsonResponse({'yo': 'lo'})    
