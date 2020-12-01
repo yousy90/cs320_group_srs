@@ -7,7 +7,9 @@ from django.urls import reverse
 # whose username is already taken
 from django.db import IntegrityError
 
-
+# Exception when attempting to SELECT
+# an entry that doesn't exist
+from django.core.exceptions import ObjectDoesNotExist
 
 
 # Our set of models 
