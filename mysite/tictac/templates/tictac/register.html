@@ -1,0 +1,33 @@
+<h1> This is the registration page </h1>
+
+
+
+{% if method == 'GET' %}
+<h1> Please select a username and password </h1>
+
+
+<form action="/tictac/register/" method="post">
+    {% csrf_token %}
+    <label for="uname">Username:</label><br>
+    <input type="text" id="uname" name="uname"><br>
+    <label for="pword">Password:</label><br>
+    <input type="text" id="pword" name="pword">
+    <input type="submit" value="Submit">
+</form>
+
+
+{% elif method == 'POST' %}
+
+    {% if successfully_registered %}
+        <h1> You successfully registered, {{username}}!</h1>
+        <form action="/tictac/login" method="get">
+            <input type="submit" value="Login">
+        </form>
+        
+    {% else %}
+        <h1> That username is already taken <h1>
+    {% endif %}
+
+
+{% endif %}
+
