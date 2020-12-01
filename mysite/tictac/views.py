@@ -34,6 +34,13 @@ def register(request):
         their username
     """
 
+
+    # Testing if user has already logged in
+    already_logged = request.session.get('username', None)
+    if already_logged:
+        return HttpResponseRedirect(reverse('tictac:homepage'))
+
+    # Getting here means the user has not logged in
     # GET handler
     if request.method == 'GET':
         return render(request, 'tictac/register.html', {'method': 'GET'})
@@ -61,6 +68,11 @@ def register(request):
 
 def login(request):
 
+    # Checking if the user has already logged in
+    already_logged = request.session.get('username', None)
+    if already_logged:
+        return HttpResponseRedirect(reverse('tictac:homepage'))
+    
     # GET handler
     if request.method == 'GET':
         return render(request, 'tictac/login.html', {'method': 'GET'})
@@ -72,12 +84,18 @@ def login(request):
 
         try:
             user = User.objects.get(username=alleged_username, password=alleged_password)
+            request.session['wins'] = user.wins
+            request.session['losses'] = user.losses
+            return HttpResponseRedirect(reverse('tictac:homepage'))
         except ObjectDoesNotExist:
             return render(request, 'tictac/login.html', {'method': 'POST'})
 
-        return HttpResponseRedirect(reverse('tictac:homepage'))
     
 
 def homepage(request):
+    username = request.session.get('username')
+    wins = request.session.get('wins')
+    losses = request.session.get('losses')
 
-    return render(request, 'tictac/homepage.html')
+    return render(request, 'tictac/homepage.html', {'username': username, 'wins': wins, 'losses': losses})
+
