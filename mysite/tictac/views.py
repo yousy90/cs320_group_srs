@@ -93,6 +93,13 @@ def login(request):
     
 
 def homepage(request):
+
+    # Redirecting to login page if necessary
+    already_logged = request.session.get('username', None)
+    if not already_logged:
+        return HttpResponseRedirect(reverse('tictac:login'))
+
+
     username = request.session.get('username')
     wins = request.session.get('wins')
     losses = request.session.get('losses')
