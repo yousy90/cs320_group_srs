@@ -14,6 +14,23 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # Our set of models 
 from .models import User
+from .models import Game
+
+
+# standard python library I need
+from datetime import timedelta
+from datetime import datetime
+
+
+#def get_stale_game(username):
+    #now = datetime.now()
+    #expiration_cutoff = now - timedelta(hours=0, minutes=5)
+
+    # Checking for games where current user is player 1
+    #stale_game = Game.objects.filter(user1=current_user, last_timestamp__lte(expiration_cutoff))
+    #if stale_game:
+    #    return stale_game
+
 
 # Create your views here.
 def index(request):
@@ -84,6 +101,7 @@ def login(request):
 
         try:
             user = User.objects.get(username=alleged_username, password=alleged_password)
+            request.session['username'] = user.username
             request.session['wins'] = user.wins
             request.session['losses'] = user.losses
             return HttpResponseRedirect(reverse('tictac:homepage'))
@@ -105,4 +123,35 @@ def homepage(request):
     losses = request.session.get('losses')
 
     return render(request, 'tictac/homepage.html', {'username': username, 'wins': wins, 'losses': losses})
+
+
+
+
+def entergame(request):
+
+    player = request.session.get('username', None)
+    # Returning error if visitor isn't logged in
+    if player == None:
+        return render(request, 'tictac/error.html', {'error_message': 'You must login before joining a game'})
+
+    # Checking if user has open/in progress games  
+    # Need to check for games where user1 or user2 is username and timestamp > 5 mins old to accomplish cleanup.
+    # notes original had me checking the gameid of the session, but that doesn't seem robust.
+
+    # first check if waiting game   
+    now = datetime.now()
+    cutoff = now - timedelta(hours=0, minutes=5) 
+    queued_game = Game.objects.filter(user2='none', last_timestamp__gt=cutoff)
+    if queued_game:
+        return HttpResponse('Queued game is waiting!')
+    else:
+        return HttpResponse('No game is waiting')
+   
+
+    
+
+
+
+
+
 

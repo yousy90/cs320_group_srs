@@ -8,4 +8,6 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', views.login, name='login'),
     path('homepage/', views.homepage, name='homepage'),
+    path('entergame/', views.entergame, name='entergame')
+    #path('siteerror/', views.siteerror, name='siteerror')
 ]
