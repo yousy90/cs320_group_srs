@@ -20,13 +20,12 @@ class Queue(models.Model):
 
 
 class Game(models.Model):
-    gameid = models.AutoField(primary_key=True)
+    game_id = models.AutoField(primary_key=True)
     user1 = models.ForeignKey(User, related_name="user1", on_delete=models.CASCADE)
-    user2 = models.ForeignKey(User, related_name="user2", on_delete=models.CASCADE)
+    user2 = models.ForeignKey(User, related_name="user2", on_delete=models.CASCADE, null=True, blank=True)
 
     # 1 = user1
     # 2 = user2
-    current_player = models.PositiveSmallIntegerField('current_player')
 
     # [1][2][3]
     # [4][5][6]
@@ -38,7 +37,7 @@ class Game(models.Model):
 
     #[n][n][n]-[n][n][n]-[n][n][n]
 
-    grid_squares = models.CharField('grid_state', max_length=29)
+    grid_squares = models.CharField('grid_state', max_length=29, null=True, blank=True)
     last_timestamp = models.DateTimeField('last_updated', auto_now=True)
 
 

@@ -129,23 +129,45 @@ def homepage(request):
 
 def entergame(request):
 
-    player = request.session.get('username', None)
+    player_name = request.session.get('username', None)
     # Returning error if visitor isn't logged in
-    if player == None:
+    if player_name == None:
         return render(request, 'tictac/error.html', {'error_message': 'You must login before joining a game'})
 
     # Checking if user has open/in progress games  
     # Need to check for games where user1 or user2 is username and timestamp > 5 mins old to accomplish cleanup.
     # notes original had me checking the gameid of the session, but that doesn't seem robust.
+    current_user = User.objects.get(username=player_name)
 
+    # Check if the player has  stale queues or games that timed out
+    now = datetime.now()
+    cutoff = now - timedelta(hours=0, minutes=1) 
+    if  Game.objects.filter(user1=current_user, user2=None, last_timestamp__lte=cutoff).first():
+        Game.objects.filter(user1=current_user, user2=None, last_timestamp__lte=cutoff).delete()
+        return HttpResponse('You had a stale queue entry. We deleted it :)')
+    
+
+
+    # Throw error if the player is already queuing 
+    if  Game.objects.filter(user1=current_user, user2=None).first():
+        queued_game = Game.objects.get(user1=current_user, user2=None)
+        return HttpResponse(f'you are already queued for a game ({queued_game.game_id})')
+        
+
+
+        
     # first check if waiting game   
     now = datetime.now()
     cutoff = now - timedelta(hours=0, minutes=5) 
     queued_game = Game.objects.filter(user2='none', last_timestamp__gt=cutoff)
+
     if queued_game:
         return HttpResponse('Queued game is waiting!')
     else:
-        return HttpResponse('No game is waiting')
+       # No game waiting. Creating new game 
+        new_game = Game.objects.create(user1=current_user)
+        request.session['game_id'] = new_game.game_id
+        return HttpResponse(f'Created a new game with the id of {new_game.game_id}')
    
 
     
