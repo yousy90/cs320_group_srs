@@ -98,7 +98,7 @@ def clean_timeout_game(user):
         return True
 
     # Now checking where user is in the player2 slot
-    timeouts_user2 = Game.objects.filter(user1__isnull=False, user2=user, completion_status=0, last_timestamp__lte=expiration_cutoff).filter()
+    timeouts_user2 = Game.objects.filter(user1__isnull=False, user2=user, completion_status=0, last_timestamp__lte=expiration_cutoff).first()
     if timeouts_user2:
         closeout_game(timeouts_user2)
         return True
