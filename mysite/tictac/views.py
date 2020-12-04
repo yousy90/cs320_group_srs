@@ -92,18 +92,16 @@ def clean_timeout_game(user):
 
     # Retrieving potential Game entry
     # First trying where user is in the player 1  slot
-    timeouts_user1 = Game.objects.filter(user1=user, user2__isnull=False, completion_status=0, last_timestamp__lte=expiration_cutoff)
-    if timeouts_user1.count() > 0:
-        for game in timeouts_user1:
-            closeout_game(game) 
-            return True
+    timeouts_user1 = Game.objects.filter(user1=user, user2__isnull=False, completion_status=0, last_timestamp__lte=expiration_cutoff).first()
+    if timeouts_user1:
+        closeout_game(timeouts_user1) 
+        return True
 
     # Now checking where user is in the player2 slot
-    timeouts_user2 = Game.objects.filter(user1__isnull=False, user2=user, completion_status=0, last_timestamp__lte=expiration_cutoff)
-    if timeouts_user2.count() > 0:
-        for game in timeouts_user2:
-            closeout_game(game)
-            return True
+    timeouts_user2 = Game.objects.filter(user1__isnull=False, user2=user, completion_status=0, last_timestamp__lte=expiration_cutoff).filter()
+    if timeouts_user2:
+        closeout_game(timeouts_user2)
+        return True
 
     return False 
 
@@ -222,9 +220,10 @@ def homepage(request):
         return HttpResponseRedirect(reverse('tictac:login'))
 
 
-    username = request.session.get('username')
-    wins = request.session.get('wins')
-    losses = request.session.get('losses')
+    user = User.objects.get(username=already_logged)
+    username = user.username
+    wins = user.wins
+    losses = user.losses
 
     return render(request, 'tictac/homepage.html', {'username': username, 'wins': wins, 'losses': losses})
 
