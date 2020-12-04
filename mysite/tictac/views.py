@@ -1,8 +1,14 @@
 """
 
-    TODO: 
+    TODO: Matching into a queue should redirect to a game page.
+          Entering into an empty queue should keep refreshing a page that queries the checkqueue api endpoint,
+                then redirect to the game page upon match.
+          
          
-
+         Django template values can be used in script tags. Also important that
+                variable values carry over between script tags, so theoretically a static JS can be fed values.
+                This will allow javascript to redirect to the relevant URL/API endpoint if the user is currently
+                waitin in a queue and refreshing the api_checkqueue() endpoint.
 
     Notes: 
         -user1 is always X and user2 is always O        
