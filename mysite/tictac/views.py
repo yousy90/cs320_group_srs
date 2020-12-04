@@ -1,8 +1,8 @@
 """
 
-    TODO: Modify the Game model to include a 'concluded' bool and 'outcome' e.g. 'timeout', 'completed'.
-          This way things aren't deleting - lessen ambiguity - but its possible to filter out
-          deviant Game entries that have already been addressed.
+    TODO: 
+         
+        
 
 
 """
@@ -278,19 +278,59 @@ def entergame(request):
         queued_game.user2 = current_user
         queued_game.outcome = 'IN_PROGRESS'                                                                                                                          
         queued_game.save()
+        request.session['game_id'] = queued_game.game_id
         return HttpResponse(f'You\'ve matched against {queued_game.user1}!')
 
     else:
        # No game waiting. Creating new game 
-        new_game = Game.objects.create(user1=current_user, user2=None, current_player=current_user, completion_status=0, outcome='N/A')
+        new_game = Game.objects.create(user1=current_user, user2=None, current_player=current_user, completion_status=0, outcome='LFG')
         request.session['game_id'] = new_game.game_id
         return HttpResponse(f'Created a new game with the id of {new_game.game_id}')
    
 
+def api_checkqueue(request):
+
+    """
+        This function needs to evalaute the status of a given Game
+        and return the parsed information.
+    """
+
+    # Returning error if visitor isn't logged in
+    player_name = request.session.get('username', None)
+    if player_name == None:
+        return render(request, 'tictac/error.html', {'error_message': 'You\' trying to access the API but aren\' logged in.'})
+
+    ## SHOULD BE ATOMIC
+    # Evaluating game_id
+    game_id = request.session['game_id']
+    game = Game.objects.filter(game_id=game_id).first()
+    if not game:
+        return HttpResponse('Invalid game_id')
     
+    # Evaluating Game entry for timeout
+    now = datetime.now()
+    cutoff = now - timedelta(hours=0, minutes=5) 
+    if Game.objects.filter(game_id=game_id, outcome='LFG', last_timestamp__lte=cutoff).first():
+        game.completion_status = 1
+        game.outcome = 'QUEUE_TIMEOUT'
+        game.save()
+        return HttpResponse('Queue timed out')
+    elif Game.objects.filer(game_id=game_id, outcome='LFG', last_timestamp__gt=cutoff).first(): 
+        return HttpResponse('Still searching..')
+
+    # Checking for game conclusion
+    if game.completion_status == 1: 
+        return HttpResponse(f'Game has been marked as over with status {game.outcome}')
 
 
+    if game.outcome == 'IN_PROGRESS':
+        opponent_name = None
+        if player_name == game.user1.username:
+            opponent_name = user2.username
+        else:
+            opponent_name = user1.username
 
+        return HttpResponse(f'Game found. Opponent: {opponent_name}, current player:{game.current_player.username}')
 
-
-
+        
+    return HttpResponse('SOMEHOW WE ENDED UP HERE')
