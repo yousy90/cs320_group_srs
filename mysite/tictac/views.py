@@ -285,20 +285,28 @@ def entergame(request):
     queued_game = Game.objects.filter(user2=None, completion_status=0, last_timestamp__gt=cutoff).first()
 
     if queued_game:
+        # Current player has just entered a game without waiting in a queue
+        # This should redirect the current player to the "game" page.
         queued_game.user2 = current_user
         queued_game.outcome = 'IN_PROGRESS'                                                                                                                          
         queued_game.save()
         request.session['game_id'] = queued_game.game_id
         request.session['allegiance'] = 'O'
-        return HttpResponse(f'You\'ve matched against {queued_game.user1}!')
+        return render(request, 'tictac/game.html', {'current_user': current_user.username, 'opponent': queued_game.user1.username, 'allegiance': 'O'})
+        #return HttpResponse(f'You\'ve matched against {queued_game.user1}!')
 
     else:
-       # No game waiting. Creating new game 
+        # No game waiting. Creating new game 
+        # This means the player is waiting on someone else to join the queue
+        # and must regularly query for updates on queue status.
+        # Should redirect to a self-refreshing "queue" page. 
         new_game = Game.objects.create(user1=current_user, user2=None, current_player=current_user, completion_status=0, outcome='LFG')
         request.session['game_id'] = new_game.game_id
         request.session['allegiance'] = 'X'
-        return HttpResponse(f'Created a new game with the id of {new_game.game_id}')
+        return HttpResponseRedirect(reverse('tictac:api_checkqueue'))
+        #return HttpResponse(f'Created a new game with the id of {new_game.game_id}')
    
+
 
 def api_checkqueue(request):
 
@@ -320,11 +328,12 @@ def api_checkqueue(request):
         return HttpResponse('Invalid game_id')
     
     # Evaluating Game entry for timeout
+    # SHOULD REDIRECT TO HOMEPAGE
     now = datetime.now()
-    cutoff = now - timedelta(hours=0, minutes=5) 
+    cutoff = now - timedelta(hours=0, minutes=QUEUE_TIMEOUT_MINUTES) 
     if Game.objects.filter(game_id=game_id, outcome='LFG', last_timestamp__gt=cutoff).first():
-        return HttpResponse('Still searching..')
-    elif Game.objects.filer(game_id=game_id, outcome='LFG', last_timestamp__lte=cutoff).first(): 
+        return render(request, 'tictac/queue.html',{'status': 'waiting'})
+    elif Game.objects.filter(game_id=game_id, outcome='LFG', last_timestamp__lte=cutoff).first(): 
         game.completion_status = 1
         game.outcome = 'QUEUE_TIMEOUT'
         game.save()
@@ -338,10 +347,11 @@ def api_checkqueue(request):
     if game.outcome == 'IN_PROGRESS':
         opponent_name = None
         if player_name == game.user1.username:
-            opponent_name = user2.username
+            opponent_name = game.user2.username
         else:
-            opponent_name = user1.username
-        return HttpResponse(f'Game found. Opponent: {opponent_name}, current player:{game.current_player.username}')
+            opponent_name = game.user1.username
+        return render(request, 'tictac/game.html', {'current_user': player_name, 'opponent': opponent_name, 'allegiance': 'X'})
+        #return HttpResponse(f'Game found. Opponent: {opponent_name}, current player:{game.current_player.username}')
 
     # Uh oh 
     return HttpResponse('SOMEHOW WE ENDED UP HERE')

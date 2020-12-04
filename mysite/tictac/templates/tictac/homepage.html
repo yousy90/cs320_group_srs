@@ -7,3 +7,8 @@
 
 <h1> Wins: {{wins}} </h1>
 <h1> Losses: {{losses}} </h1>
+
+<form action="/tictac/entergame/" method="get">
+    {% csrf_token %}
+    <button type="submit">Enter Matchmaking</button>
+</form>
