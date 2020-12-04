@@ -23,6 +23,10 @@ class Game(models.Model):
     game_id = models.AutoField(primary_key=True)
     user1 = models.ForeignKey(User, related_name="user1", on_delete=models.CASCADE)
     user2 = models.ForeignKey(User, related_name="user2", on_delete=models.CASCADE, null=True, blank=True)
+    current_player = models.ForeignKey(User, related_name="current_player", on_delete=models.CASCADE, null=True, blank=True)
+    # 0 = incomplete, 1 = complete
+    completion_status = models.PositiveSmallIntegerField('completion_status', default=0)
+    outcome = models.CharField('outcome', max_length=30, default='N/A')
 
     # 1 = user1
     # 2 = user2
