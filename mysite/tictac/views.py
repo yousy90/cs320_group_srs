@@ -276,7 +276,11 @@ def entergame(request):
     queued_game = Game.objects.filter(user2=None, completion_status=0, last_timestamp__gt=cutoff).first()
 
     if queued_game:
+        queued_game.user2 = current_user
+        queued_game.outcome = 'IN_PROGRESS'                                                                                                                          
+        queued_game.save()
         return HttpResponse(f'You\'ve matched against {queued_game.user1}!')
+
     else:
        # No game waiting. Creating new game 
         new_game = Game.objects.create(user1=current_user, user2=None, current_player=current_user, completion_status=0, outcome='N/A')
