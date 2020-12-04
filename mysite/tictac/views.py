@@ -273,7 +273,7 @@ def entergame(request):
     # first check if waiting game   
     now = datetime.now()
     cutoff = now - timedelta(hours=0, minutes=5) 
-    queued_game = Game.objects.get(user2=None, completion_status=0, last_timestamp__gt=cutoff).first()
+    queued_game = Game.objects.filter(user2=None, completion_status=0, last_timestamp__gt=cutoff).first()
 
     if queued_game:
         return HttpResponse(f'You\'ve matched against {queued_game.user1}!')
