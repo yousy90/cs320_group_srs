@@ -1,0 +1,14 @@
+<h1> This is the homepage </h1>
+
+<h1> Welcome {{ username }} </h1>
+
+
+<h1> Your stats </h1>
+
+<h1> Wins: {{wins}} </h1>
+<h1> Losses: {{losses}} </h1>
+
+<form action="/tictac/entergame/" method="get">
+    {% csrf_token %}
+    <button type="submit">Enter Matchmaking</button>
+</form>
