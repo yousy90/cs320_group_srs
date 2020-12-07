@@ -46,6 +46,8 @@ from .models import Game
 from datetime import timedelta
 from datetime import datetime
 
+# convenient json response function
+from django.http import JsonResponse
 
 def clean_expired_queue(user):
     """
@@ -357,3 +359,17 @@ def api_checkqueue(request):
 
     # Uh oh 
     return HttpResponse('SOMEHOW WE ENDED UP HERE')
+
+
+def api_checkstate(request):
+
+    """
+        Meant to be consumed by a game client that is waiting on another player.
+        Client polls this endpoint every few seconds, expecting game state to change
+        within MOVE_TIMEOUT_SECONDS
+    """
+    return JsonResponse({'hey': 'ho'})
+
+
+
+

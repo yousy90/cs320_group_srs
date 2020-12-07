@@ -1,3 +1,6 @@
+import time
+
+
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -139,4 +142,5 @@ def homepage(request):
 from django.http import JsonResponse
 
 def apitest(request):
+    time.sleep(5)
     return JsonResponse({'yo': 'lo'})    

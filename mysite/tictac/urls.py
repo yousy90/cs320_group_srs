@@ -10,5 +10,6 @@ urlpatterns = [
     path('homepage/', views.homepage, name='homepage'),
     path('entergame/', views.entergame, name='entergame'),
     path('api_checkqueue/', views.api_checkqueue, name='api_checkqueue'),
+    path('api_checkstate/', views.api_checkstate, name='api_checkstate'),
     #path('siteerror/', views.siteerror, name='siteerror')
 ]
