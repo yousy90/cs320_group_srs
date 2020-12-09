@@ -8,9 +8,9 @@
 
 const fetch = require('node-fetch')
 
-MOVE_API_ENDPOINT   = 'http://138.68.18.203:8002/polls/api_makemove'
-STATECHECK_ENDPOINT = 'http://138.68.18.203:8002/polls/api_checkstate'
-
+MOVE_API_ENDPOINT   = 'http://138.68.18.203:8002/tictac/api_makemove/'
+STATECHECK_ENDPOINT = 'http://138.68.18.203:8002/tictac/api_checkstate/'
+TEST_ENDPOINT = 'http://138.68.18.203:8002/tictac/api_test/'
 
 class View {
 
@@ -87,9 +87,26 @@ class View {
 }
 
 
-var ourview = new View('zeratul', 'X', 'kerrigan', 30);
+function sa_process_success(data) {
+  console.log(data);
+}
 
-console.log('here');
+function sa_process_failure(data) {
+  console.log(data);
+}
+//var ourview = new View('zeratul', 'X', 'kerrigan', 30);
+
+data = {move: "sq1"}
+fetch(TEST_ENDPOINT, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(data)
+})
+    .then(res => res.json())
+    .then(data => sa_process_success(data))
+    .catch(error => sa_process_failure(error));
 
 
 
